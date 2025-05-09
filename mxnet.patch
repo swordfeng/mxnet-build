@@ -1,0 +1,223 @@
+diff --git a/python/mxnet/numpy/utils.py b/python/mxnet/numpy/utils.py
+index 186b3a034..f2b821717 100644
+--- a/python/mxnet/numpy/utils.py
++++ b/python/mxnet/numpy/utils.py
+@@ -20,6 +20,9 @@
+ 
+ 
+ import numpy as onp
++if not hasattr(onp, 'bool'):
++    # Monkey patch to make it happy
++    onp.bool = bool
+ 
+ __all__ = ['float16', 'float32', 'float64', 'uint8', 'int32', 'int8', 'int64',
+            'bool', 'bool_', 'pi', 'inf', 'nan', 'PZERO', 'NZERO', 'newaxis', 'finfo',
+diff --git a/python/setup.py b/python/setup.py
+index dcd84cef1..cedcabb76 100644
+--- a/python/setup.py
++++ b/python/setup.py
+@@ -22,6 +22,15 @@ import os
+ import sys
+ from setuptools import find_packages # This must precede distutils
+ 
++# https://stackoverflow.com/a/62668026
++from setuptools.dist import Distribution
++class BinaryDistribution(Distribution):
++    """Distribution which always forces a binary package with platform name"""
++    def has_ext_modules(self):
++        return True
++    def is_pure(self):
++        return False
++
+ # need to use distutils.core for correct placement of cython dll
+ kwargs = {}
+ if "--inplace" in sys.argv:
+@@ -121,7 +130,7 @@ setup(name='mxnet',
+       version=__version__,
+       description=open(os.path.join(CURRENT_DIR, 'README.md')).read(),
+       packages=find_packages(),
+-      data_files=[('mxnet', [LIB_PATH[0]])],
++      package_data={'mxnet': [LIB_PATH[0]]},
+       url='https://github.com/apache/incubator-mxnet',
+       ext_modules=config_cython(),
+       classifiers=[
+@@ -148,4 +157,5 @@ setup(name='mxnet',
+           'Topic :: Software Development :: Libraries',
+           'Topic :: Software Development :: Libraries :: Python Modules',
+       ],
++      distclass=BinaryDistribution,
+       **kwargs)
+diff --git a/src/operator/leaky_relu-inl.h b/src/operator/leaky_relu-inl.h
+index 4ae532e38..f0c89c0c1 100644
+--- a/src/operator/leaky_relu-inl.h
++++ b/src/operator/leaky_relu-inl.h
+@@ -134,7 +134,7 @@ class LeakyReLUOp : public Operator {
+             mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+             mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+             mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, mshadow_op::xelu>, xpu>::
+-            template LaunchEx(s, new_oshape.Size(), req[leakyrelu::kOut], lstride, rstride, oshape,
++            template LaunchEx<>(s, new_oshape.Size(), req[leakyrelu::kOut], lstride, rstride, oshape,
+             in_data[leakyrelu::kData].dptr<DType>(), in_data[leakyrelu::kGamma].dptr<DType>(),
+             out_data[leakyrelu::kOut].dptr<DType>());
+           });
+diff --git a/src/operator/nn/dropout-inl.h b/src/operator/nn/dropout-inl.h
+index 389cf36cb..00b9f4fb3 100644
+--- a/src/operator/nn/dropout-inl.h
++++ b/src/operator/nn/dropout-inl.h
+@@ -394,7 +394,7 @@ class DropoutOp {
+               mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+               mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+               mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, mshadow_op::mul>, xpu>::
+-              template LaunchEx(s, new_oshape.Size(), req[dropout::kOut],
++              template LaunchEx<>(s, new_oshape.Size(), req[dropout::kOut],
+               lstride, rstride, oshape,
+               in.dptr<DType>(),
+               mask.dptr<DType>(), out.dptr<DType>());
+@@ -462,7 +462,7 @@ class DropoutOp {
+             mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+             mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+             mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, mshadow_op::mul>, xpu>::
+-            template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++            template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+             grad.dptr<DType>(), mask.dptr<DType>(), gdata.dptr<DType>());
+           });
+         }
+diff --git a/src/operator/numpy/np_elemwise_broadcast_op.h b/src/operator/numpy/np_elemwise_broadcast_op.h
+index d3894c0a0..5147c0e97 100644
+--- a/src/operator/numpy/np_elemwise_broadcast_op.h
++++ b/src/operator/numpy/np_elemwise_broadcast_op.h
+@@ -184,7 +184,7 @@ void MixedAllRealBinaryBroadcastCompute(const std::string& op_name,
+       {
+         if (rhs.type_flag_ == mshadow::kFloat16) {
+           mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-          template LaunchEx(s, new_oshape.Size(), req, rstride, lstride, oshape,
++          template LaunchEx<>(s, new_oshape.Size(), req, rstride, lstride, oshape,
+           rhs.dptr<mshadow::half::half_t>(), lhs.dptr<float>(), out.dptr<float>());
+         } else {
+           PrintErrorMessage(op_name, lhs.type_flag_, rhs.type_flag_);
+@@ -195,11 +195,11 @@ void MixedAllRealBinaryBroadcastCompute(const std::string& op_name,
+       {
+         if (rhs.type_flag_ == mshadow::kFloat16) {
+           mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-          template LaunchEx(s, new_oshape.Size(), req, rstride, lstride, oshape,
++          template LaunchEx<>(s, new_oshape.Size(), req, rstride, lstride, oshape,
+           rhs.dptr<mshadow::half::half_t>(), lhs.dptr<double>(), out.dptr<double>());
+         } else if (rhs.type_flag_ == mshadow::kFloat32) {
+           mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-          template LaunchEx(s, new_oshape.Size(), req, rstride, lstride, oshape,
++          template LaunchEx<>(s, new_oshape.Size(), req, rstride, lstride, oshape,
+           rhs.dptr<float>(), lhs.dptr<double>(), out.dptr<double>());
+         } else {
+           PrintErrorMessage(op_name, lhs.type_flag_, rhs.type_flag_);
+@@ -257,7 +257,7 @@ void MixedBinaryBroadcastCompute(const nnvm::NodeAttrs& attrs,
+           MSHADOW_REAL_TYPE_SWITCH(out.type_flag_, LType, {
+             MXNET_INT_TYPE_SWITCH(rhs.type_flag_, RType, {
+               mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, ROP>, xpu>::
+-              template LaunchEx(s, new_oshape.Size(), req[0], rstride, lstride, oshape,
++              template LaunchEx<>(s, new_oshape.Size(), req[0], rstride, lstride, oshape,
+               rhs.dptr<RType>(), lhs.dptr<LType>(), out.dptr<LType>());
+             });
+           });
+@@ -265,7 +265,7 @@ void MixedBinaryBroadcastCompute(const nnvm::NodeAttrs& attrs,
+           MSHADOW_REAL_TYPE_SWITCH(out.type_flag_, RType, {
+             MXNET_INT_TYPE_SWITCH(lhs.type_flag_, LType, {
+               mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, LOP>, xpu>::
+-              template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++              template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+               lhs.dptr<LType>(), rhs.dptr<RType>(), out.dptr<RType>());
+             });
+           });
+diff --git a/src/operator/numpy/np_true_divide-inl.h b/src/operator/numpy/np_true_divide-inl.h
+index ac47f2fde..787410ff0 100644
+--- a/src/operator/numpy/np_true_divide-inl.h
++++ b/src/operator/numpy/np_true_divide-inl.h
+@@ -179,7 +179,7 @@ void TrueDivideBroadcastCompute(const nnvm::NodeAttrs& attrs,
+           // If both inputs are the same float types, output is the same float type
+           MSHADOW_REAL_TYPE_SWITCH(lhs.type_flag_, DType, {
+             Kernel<binary_broadcast_kernel<NDim, mshadow_op::true_divide>, xpu>::
+-              template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++              template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+                                 lhs.dptr<DType>(), rhs.dptr<DType>(), out.dptr<DType>());
+           });
+         } else {
+@@ -189,7 +189,7 @@ void TrueDivideBroadcastCompute(const nnvm::NodeAttrs& attrs,
+           MXNET_INT_TYPE_SWITCH(lhs.type_flag_, DType, {
+             // If both inputs are the same integer types, output is float type
+             Kernel<binary_broadcast_kernel<NDim, mshadow_op::true_divide>, xpu>::
+-              template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++              template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+                                 lhs.dptr<DType>(), rhs.dptr<DType>(), out.dptr<float>());
+           });
+         }
+@@ -206,7 +206,7 @@ void TrueDivideBroadcastCompute(const nnvm::NodeAttrs& attrs,
+             MSHADOW_REAL_TYPE_SWITCH(lhs.type_flag_, LType, {
+               MXNET_INT_TYPE_SWITCH(rhs.type_flag_, RType, {
+                 Kernel<binary_broadcast_kernel<NDim, mshadow_op::rtrue_divide>, xpu>::
+-                  template LaunchEx(s, new_oshape.Size(), req[0], rstride, lstride, oshape,
++                  template LaunchEx<>(s, new_oshape.Size(), req[0], rstride, lstride, oshape,
+                                     rhs.dptr<RType>(), lhs.dptr<LType>(), out.dptr<LType>());
+               });
+             });
+@@ -217,7 +217,7 @@ void TrueDivideBroadcastCompute(const nnvm::NodeAttrs& attrs,
+             MXNET_INT_TYPE_SWITCH(lhs.type_flag_, LType, {
+               MSHADOW_REAL_TYPE_SWITCH(rhs.type_flag_, RType, {
+                 Kernel<binary_broadcast_kernel<NDim, mshadow_op::true_divide>, xpu>::
+-                  template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++                  template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+                                     lhs.dptr<LType>(), rhs.dptr<RType>(), out.dptr<RType>());
+               });
+             });
+diff --git a/src/operator/tensor/elemwise_binary_broadcast_op.h b/src/operator/tensor/elemwise_binary_broadcast_op.h
+index ce10ce359..1e35573e2 100644
+--- a/src/operator/tensor/elemwise_binary_broadcast_op.h
++++ b/src/operator/tensor/elemwise_binary_broadcast_op.h
+@@ -355,7 +355,7 @@ void BinaryBroadcastIntCompute(const nnvm::NodeAttrs& attrs,
+         mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+         mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+         mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-        template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++        template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+         inputs[0].dptr<DType>(), inputs[1].dptr<DType>(), outputs[0].dptr<DType>());
+       });
+     });
+@@ -386,7 +386,7 @@ void BinaryBroadcastCompute(const nnvm::NodeAttrs& attrs,
+         mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+         mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+         mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-        template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++        template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+         inputs[0].dptr<DType>(), inputs[1].dptr<DType>(), outputs[0].dptr<DType>());
+       });
+     });
+@@ -414,7 +414,7 @@ void BinaryBroadcastComputeWithBool(const nnvm::NodeAttrs& attrs,
+         mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+         mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+         mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-        template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++        template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+         inputs[0].dptr<DType>(), inputs[1].dptr<DType>(), outputs[0].dptr<DType>());
+       });
+     });
+@@ -442,7 +442,7 @@ void BinaryBroadcastComputeLogic(const nnvm::NodeAttrs& attrs,
+           mshadow::Shape<NDim> lstride = mxnet_op::calc_stride(new_lshape.get<NDim>());
+           mshadow::Shape<NDim> rstride = mxnet_op::calc_stride(new_rshape.get<NDim>());
+           mxnet_op::Kernel<mxnet_op::binary_broadcast_kernel<NDim, OP>, xpu>::
+-          template LaunchEx(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
++          template LaunchEx<>(s, new_oshape.Size(), req[0], lstride, rstride, oshape,
+                             inputs[0].dptr<DType>(), inputs[1].dptr<DType>(),
+                             outputs[0].dptr<bool>());
+         });
+@@ -549,11 +549,11 @@ void BinaryBroadcastCsrDnsDnsImpl(const OpContext& ctx,
+       Shape<NDim> rstride = calc_stride(new_dnsshape.get<NDim>());
+       if (reverse && std::is_same<OP, mshadow_op::minus>::value) {
+         Kernel<binary_broadcast_kernel<NDim, mshadow_op::plus>, xpu>::
+-        template LaunchEx(s, new_oshape.Size(), req, lstride, rstride, oshape,
++        template LaunchEx<>(s, new_oshape.Size(), req, lstride, rstride, oshape,
+         DType(0), dns_data.dptr<DType>(), out_data.dptr<DType>());
+       } else {
+         Kernel<binary_broadcast_kernel<NDim, OP>, xpu>::
+-        template LaunchEx(s, new_oshape.Size(), req, lstride, rstride, oshape,
++        template LaunchEx<>(s, new_oshape.Size(), req, lstride, rstride, oshape,
+         DType(0), dns_data.dptr<DType>(), out_data.dptr<DType>());
+       }
+     });

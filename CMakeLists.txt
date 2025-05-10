@@ -11,12 +11,6 @@ if(CCACHE_FOUND)
   set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
 endif()
 
-set(mxnet_CMAKE_CONFIG "")
-if(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-  message(STATUS "Disabling SSE on Apple Silicon")
-  list(APPEND mxnet_CMAKE_CONFIG "-DUSE_SSE=OFF")
-endif()
-
 ExternalProject_Add(
   opencv
   GIT_REPOSITORY https://github.com/opencv/opencv.git

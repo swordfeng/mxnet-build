@@ -29,6 +29,7 @@ ExternalProject_Add(
         "-DBUILD_JAVA:BOOL=OFF"
         "-DBUILD_SHARED_LIBS:BOOL=OFF"
         "-DWITH_OPENEXR:BOOL=OFF"
+        "-DWITH_PROTOBUF:BOOL=OFF"
 )
 
 ExternalProject_Add(

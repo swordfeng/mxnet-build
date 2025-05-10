@@ -1,3 +1,16 @@
+diff --git a/cmake/Modules/FindOpenBLAS.cmake b/cmake/Modules/FindOpenBLAS.cmake
+index a3a79caae..b5804e951 100644
+--- a/cmake/Modules/FindOpenBLAS.cmake
++++ b/cmake/Modules/FindOpenBLAS.cmake
+@@ -52,7 +52,7 @@ SET(Open_BLAS_LIB_SEARCH_PATHS
+         ${OpenBLAS_HOME}/lib
+  )
+ 
+-FIND_PATH(OpenBLAS_INCLUDE_DIR NAMES cblas.h PATHS ${Open_BLAS_INCLUDE_SEARCH_PATHS})
++FIND_PATH(OpenBLAS_INCLUDE_DIR NAMES cblas.h PATHS ${Open_BLAS_INCLUDE_SEARCH_PATHS} PATH_SUFFIXES openblas)
+ FIND_LIBRARY(OpenBLAS_LIB NAMES openblas PATHS ${Open_BLAS_LIB_SEARCH_PATHS})
+ IF(NOT OpenBLAS_LIB)
+ 	FIND_FILE(OpenBLAS_LIB NAMES libopenblas.dll.a PATHS ${Open_BLAS_LIB_SEARCH_PATHS})
 diff --git a/python/mxnet/numpy/utils.py b/python/mxnet/numpy/utils.py
 index 186b3a034..f2b821717 100644
 --- a/python/mxnet/numpy/utils.py

@@ -4,6 +4,9 @@ include(ExternalProject)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/install_root)
 
+# Help find issues
+set(CMAKE_FIND_DEBUG_MODE TRUE)
+
 ExternalProject_Add(
     opencv
     GIT_REPOSITORY https://github.com/opencv/opencv.git

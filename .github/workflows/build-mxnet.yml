@@ -26,10 +26,14 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}-${{ matrix.os }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      # - name: Install uv
+      #   uses: astral-sh/setup-uv@v5
+      #   with:
+      #     version: "0.7.3"
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          version: "0.7.3"
+          python-version: '3.8'
       - name: Check compiler version
         run: ${CC:-cc} --version
       - name: Checkout source
@@ -37,5 +41,31 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Build
+        id: build
         uses: threeal/cmake-action@v2.1.0
-
+      - name: Verify lib dependencies
+        id: lib_output
+        uses: knicknic/os-specific-run@v1.0.3
+        with:
+          macos: |
+            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.dylib"
+            otool -L $lib_path
+            echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+          linux: |
+            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
+            ldd $lib_path
+            echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+      - name: Bundle Python wheel
+        id: wheel_output
+        run: |
+          cp "${{ steps.lib_output.outputs.path }}" mxnet/python/mxnet/
+          pip wheel mxnet/python
+          wheel_path=(mxnet-*.whl)
+          echo "path=${wheel_path}" >> "$GITHUB_OUTPUT"
+      - name: 'Upload artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            ${{ steps.lib_output.outputs.path }}
+            ${{ steps.wheel_output.outputs.path }}

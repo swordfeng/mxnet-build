@@ -7,6 +7,13 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/install_root)
 # Help find issues
 set(CMAKE_FIND_DEBUG_MODE TRUE)
 
+# Use ccache when available
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
+endif()
+
 ExternalProject_Add(
     opencv
     GIT_REPOSITORY https://github.com/opencv/opencv.git

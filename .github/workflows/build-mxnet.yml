@@ -18,22 +18,22 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - name: Setup C/C++ Compiler
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: llvm-19
-    - name: Set CMake version
-      uses: lukka/get-cmake@latest
-      with:
-        cmakeVersion: "~3.31.0"
-    - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-    - name: Check compiler version
-      run: $CC --version
-    - name: Checkout source
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    - name: Build
-      uses: threeal/cmake-action@v2.1.0
+      - name: Set CMake version
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.31.0"
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.7.3"
+      - name: Check compiler version
+        run: $CC --version
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - name: Build
+        uses: threeal/cmake-action@v2.1.0
 

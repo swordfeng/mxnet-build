@@ -21,7 +21,7 @@ jobs:
     - name: Setup C/C++ Compiler
       uses: aminya/setup-cpp@v1
       with:
-        compiler: llvm
+        compiler: llvm-19
     - name: Set CMake version
       uses: lukka/get-cmake@latest
       with:

@@ -42,16 +42,16 @@ ExternalProject_Add(
         "-DBUILD_STATIC_LIBS:BOOL=ON"
 )
 
-# ExternalProject_Add(
-#     mxnet
-#     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
-#     PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
-#     PREFIX ${CMAKE_BINARY_DIR}/mxnet
-#     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-#     CMAKE_CACHE_ARGS
-#         "-DBLAS:STRING=Open"
-#         "-DUSE_CUDA:BOOL=OFF"
-#         "-DUSE_OPENMP:BOOL=OFF"
-#         ${mxnet_CMAKE_CONFIG}
-#     DEPENDS opencv openblas
-# )
+ExternalProject_Add(
+    mxnet
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
+    PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
+    PREFIX ${CMAKE_BINARY_DIR}/mxnet
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    CMAKE_CACHE_ARGS
+        "-DBLAS:STRING=Open"
+        "-DUSE_CUDA:BOOL=OFF"
+        "-DUSE_OPENMP:BOOL=OFF"
+        ${mxnet_CMAKE_CONFIG}
+    DEPENDS opencv openblas
+)

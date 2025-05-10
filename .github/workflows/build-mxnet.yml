@@ -24,6 +24,8 @@ jobs:
           cmakeVersion: "~3.31.0"
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-${{ matrix.os }}
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

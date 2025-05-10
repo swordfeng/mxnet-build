@@ -30,6 +30,7 @@ ExternalProject_Add(
         "-DBUILD_SHARED_LIBS:BOOL=OFF"
         "-DWITH_OPENEXR:BOOL=OFF"
         "-DWITH_PROTOBUF:BOOL=OFF"
+        "-DWITH_ADE:BOOL=OFF"
 )
 
 ExternalProject_Add(

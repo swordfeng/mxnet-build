@@ -19,12 +19,20 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Setup C/C++ Compiler
+      uses: aminya/setup-cpp@v1
       with:
-        submodules: 'recursive'
-    - uses: lukka/get-cmake@latest
+        compiler: llvm
+    - name: Set CMake version
+      uses: lukka/get-cmake@latest
       with:
         cmakeVersion: "~3.31.0"
+    - name: Check compiler version
+      run: cc --version
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
     - name: Build
       uses: threeal/cmake-action@v2.1.0
 

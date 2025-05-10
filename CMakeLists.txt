@@ -22,7 +22,9 @@ ExternalProject_Add(
     GIT_REPOSITORY https://github.com/opencv/opencv.git
     GIT_TAG 4.11.0
     PREFIX ${CMAKE_BINARY_DIR}/opencv
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+        -DBUILD_LIST=core,highgui,imgproc,imgcodecs  # Build only required modules
     CMAKE_CACHE_ARGS
         "-DBUILD_JAVA:BOOL=OFF"
         "-DBUILD_SHARED_LIBS:BOOL=OFF"

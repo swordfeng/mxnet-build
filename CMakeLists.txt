@@ -7,52 +7,53 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/install_root)
 # Use ccache when available
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
-    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
-    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
+  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
 endif()
 
 set(mxnet_CMAKE_CONFIG "")
 if(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    message(STATUS "Disabling SSE on Apple Silicon")
-    list(APPEND mxnet_CMAKE_CONFIG "-DUSE_SSE:BOOL=OFF")
+  message(STATUS "Disabling SSE on Apple Silicon")
+  list(APPEND mxnet_CMAKE_CONFIG "-DUSE_SSE:BOOL=OFF")
 endif()
 
 ExternalProject_Add(
-    opencv
-    GIT_REPOSITORY https://github.com/opencv/opencv.git
-    GIT_TAG 4.11.0
-    PREFIX ${CMAKE_BINARY_DIR}/opencv
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-        -DBUILD_LIST=core,highgui,imgproc,imgcodecs  # Build only required modules
-    CMAKE_CACHE_ARGS
-        "-DBUILD_JAVA:BOOL=OFF"
-        "-DBUILD_SHARED_LIBS:BOOL=OFF"
-        "-DWITH_OPENEXR:BOOL=OFF"
-        "-DWITH_PROTOBUF:BOOL=OFF"
-        "-DWITH_ADE:BOOL=OFF"
+  opencv
+  GIT_REPOSITORY https://github.com/opencv/opencv.git
+  GIT_TAG 4.11.0
+  PREFIX ${CMAKE_BINARY_DIR}/opencv
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    -DBUILD_LIST=core,highgui,imgproc,imgcodecs  # Build only required modules
+  CMAKE_CACHE_ARGS
+    "-DBUILD_JAVA:BOOL=OFF"
+    "-DBUILD_SHARED_LIBS:BOOL=OFF"
+    "-DWITH_OPENEXR:BOOL=OFF"
+    "-DWITH_PROTOBUF:BOOL=OFF"
+    "-DWITH_ADE:BOOL=OFF"
 )
 
 ExternalProject_Add(
-    openblas
-    GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
-    GIT_TAG v0.3.29
-    PREFIX ${CMAKE_BINARY_DIR}/openblas
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-    CMAKE_CACHE_ARGS
-        "-DBUILD_STATIC_LIBS:BOOL=ON"
+  openblas
+  GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
+  GIT_TAG v0.3.29
+  PREFIX ${CMAKE_BINARY_DIR}/openblas
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+  CMAKE_CACHE_ARGS
+    "-DBUILD_STATIC_LIBS:BOOL=ON"
 )
 
 ExternalProject_Add(
-    mxnet
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
-    PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
-    PREFIX ${CMAKE_BINARY_DIR}/mxnet
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-    CMAKE_CACHE_ARGS
-        "-DBLAS:STRING=Open"
-        "-DUSE_CUDA:BOOL=OFF"
-        "-DUSE_OPENMP:BOOL=OFF"
-        ${mxnet_CMAKE_CONFIG}
-    DEPENDS opencv openblas
+  mxnet
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
+  PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
+  PREFIX ${CMAKE_BINARY_DIR}/mxnet
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+  CMAKE_CACHE_ARGS
+    "-DBLAS:STRING=Open"
+    "-DUSE_CUDA:BOOL=OFF"
+    "-DUSE_OPENMP:BOOL=OFF"
+    ${mxnet_CMAKE_CONFIG}
+  DEPENDS opencv openblas
 )

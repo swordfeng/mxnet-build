@@ -4,9 +4,6 @@ include(ExternalProject)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/install_root)
 
-# Help find issues
-set(CMAKE_FIND_DEBUG_MODE TRUE)
-
 # Use ccache when available
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -47,7 +44,7 @@ ExternalProject_Add(
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
     PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
     PREFIX ${CMAKE_BINARY_DIR}/mxnet
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root -DCMAKE_FIND_DEBUG_MODE=TRUE
     CMAKE_CACHE_ARGS
         "-DBLAS:STRING=Open"
         "-DUSE_CUDA:BOOL=OFF"

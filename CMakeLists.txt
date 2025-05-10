@@ -12,6 +12,18 @@ if(CCACHE_FOUND)
 endif()
 
 ExternalProject_Add(
+  openblas
+  GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
+  GIT_TAG v0.3.29
+  PREFIX ${CMAKE_BINARY_DIR}/openblas
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    -DBUILD_STATIC_LIBS=OFF
+    -DDYNAMIC_ARCH=ON
+    -DDYNAMIC_OLDER=ON
+)
+
+ExternalProject_Add(
   opencv
   GIT_REPOSITORY https://github.com/opencv/opencv.git
   GIT_TAG 4.11.0
@@ -24,18 +36,7 @@ ExternalProject_Add(
     -DWITH_OPENEXR=OFF
     -DWITH_PROTOBUF=OFF
     -DWITH_ADE=OFF
-)
-
-ExternalProject_Add(
-  openblas
-  GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
-  GIT_TAG v0.3.29
-  PREFIX ${CMAKE_BINARY_DIR}/openblas
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-    -DBUILD_STATIC_LIBS=OFF
-    -DDYNAMIC_ARCH=ON
-    -DDYNAMIC_OLDER=ON
+  DEPENDS openblas
 )
 
 ExternalProject_Add(

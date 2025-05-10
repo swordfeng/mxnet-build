@@ -14,7 +14,7 @@ endif()
 set(mxnet_CMAKE_CONFIG "")
 if(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
   message(STATUS "Disabling SSE on Apple Silicon")
-  list(APPEND mxnet_CMAKE_CONFIG "-DUSE_SSE:BOOL=OFF")
+  list(APPEND mxnet_CMAKE_CONFIG "-DUSE_SSE=OFF")
 endif()
 
 ExternalProject_Add(
@@ -25,12 +25,11 @@ ExternalProject_Add(
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
     -DBUILD_LIST=core,highgui,imgproc,imgcodecs  # Build only required modules
-  CMAKE_CACHE_ARGS
-    "-DBUILD_JAVA:BOOL=OFF"
-    "-DBUILD_SHARED_LIBS:BOOL=OFF"
-    "-DWITH_OPENEXR:BOOL=OFF"
-    "-DWITH_PROTOBUF:BOOL=OFF"
-    "-DWITH_ADE:BOOL=OFF"
+    -DBUILD_JAVA=OFF
+    -DBUILD_SHARED_LIBS=OFF
+    -DWITH_OPENEXR=OFF
+    -DWITH_PROTOBUF=OFF
+    -DWITH_ADE=OFF
 )
 
 ExternalProject_Add(
@@ -40,8 +39,9 @@ ExternalProject_Add(
   PREFIX ${CMAKE_BINARY_DIR}/openblas
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-  CMAKE_CACHE_ARGS
-    "-DBUILD_STATIC_LIBS:BOOL=ON"
+    -DBUILD_STATIC_LIBS=OFF
+    -DDYNAMIC_ARCH=ON
+    -DDYNAMIC_OLDER=ON
 )
 
 ExternalProject_Add(
@@ -49,11 +49,12 @@ ExternalProject_Add(
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
   PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
   PREFIX ${CMAKE_BINARY_DIR}/mxnet
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-  CMAKE_CACHE_ARGS
-    "-DBLAS:STRING=Open"
-    "-DUSE_CUDA:BOOL=OFF"
-    "-DUSE_OPENMP:BOOL=OFF"
-    ${mxnet_CMAKE_CONFIG}
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    -DCMAKE_BUILD_TYPE=Distribution
+    -DUSE_BLAS=open
+    -DUSE_CUDA=OFF
+    -DUSE_OPENMP=OFF
+    ${mxnet_CMAKE_ARGS}
   DEPENDS opencv openblas
 )

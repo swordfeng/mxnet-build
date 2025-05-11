@@ -44,6 +44,10 @@ jobs:
       - name: Build
         id: build
         uses: threeal/cmake-action@v2.1.0
+        with:
+          options: |
+            CMAKE_C_COMPILER_LAUNCHER=sccache
+            CMAKE_CXX_COMPILER_LAUNCHER=sccache
       # - name: Verify lib dependencies
       #   id: lib_output
       #   uses: knicknic/os-specific-run@v1.0.3

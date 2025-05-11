@@ -4,13 +4,6 @@ include(ExternalProject)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/install_root)
 
-# Use ccache when available
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
-  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
-endif()
-
 # ExternalProject_Add(
 #   openblas
 #   GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
@@ -31,6 +24,8 @@ ExternalProject_Add(
   GIT_TAG 4.11.0
   PREFIX ${CMAKE_BINARY_DIR}/opencv
   CMAKE_ARGS
+    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
+    -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
     -DBUILD_LIST=core#,highgui,imgproc,imgcodecs  # Build only required modules
     -DBUILD_JAVA=OFF
@@ -49,6 +44,8 @@ ExternalProject_Add(
 #     COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
 #   PREFIX ${CMAKE_BINARY_DIR}/mxnet
 #   CMAKE_ARGS
+#     -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
+#     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
 #     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
 #     -DCMAKE_INSTALL_INCLUDEDIR=${CMAKE_BINARY_DIR}/install_root/include
 #     -DCMAKE_BUILD_TYPE=Distribution

@@ -23,7 +23,7 @@ jobs:
         with:
           cmakeVersion: "~3.31.0"
       - name: Setup ccache
-        uses: chirag-droid/setup-ccache@latest
+        uses: chirag-droid/setup-ccache@v2.1
         with:
           key: ccache-${{ github.job }}-${{ matrix.os }}
       # - name: Install uv

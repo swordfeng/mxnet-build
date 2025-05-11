@@ -48,6 +48,7 @@ ExternalProject_Add(
   PREFIX ${CMAKE_BINARY_DIR}/mxnet
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    -DCMAKE_INSTALL_INCLUDEDIR=${CMAKE_BINARY_DIR}/install_root/include
     -DCMAKE_BUILD_TYPE=Distribution
     -DUSE_BLAS=open
     -DUSE_CUDA=OFF

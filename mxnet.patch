@@ -12,6 +12,19 @@ index 7b5a12610..f714b2a32 100644
  option(USE_F16C "Build with x86 F16C instruction support" ON) # autodetects support if ON
  option(USE_LAPACK "Build with lapack support" ON)
  option(USE_MKL_IF_AVAILABLE "Use MKL if found" ON)
+diff --git a/cmake/ChooseBlas.cmake b/cmake/ChooseBlas.cmake
+index 24ba7eaa7..709277df8 100644
+--- a/cmake/ChooseBlas.cmake
++++ b/cmake/ChooseBlas.cmake
+@@ -80,7 +80,7 @@ set(FORTRAN_DIR \\\"\$\{CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES\}\\\")
+         COMMAND ${CMAKE_COMMAND} .
+       )
+       set(FORTRAN_DIR "")
+-      include(build/temp/FortranDir.cmake)
++      include(${CMAKE_CURRENT_BINARY_DIR}/temp/FortranDir.cmake)
+       find_library(FORTRAN_LIB NAMES gfortran HINTS ${FORTRAN_DIR})
+       message("FORTRAN_DIR is ${FORTRAN_DIR}")
+       message("FORTRAN_LIB is ${FORTRAN_LIB}")
 diff --git a/cmake/Modules/FindOpenBLAS.cmake b/cmake/Modules/FindOpenBLAS.cmake
 index a3a79caae..b5804e951 100644
 --- a/cmake/Modules/FindOpenBLAS.cmake

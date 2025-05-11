@@ -23,9 +23,10 @@ jobs:
         with:
           cmakeVersion: "~3.31.0"
       - name: Setup ccache
-        uses: chirag-droid/setup-ccache@v2.1
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ccache-${{ github.job }}-${{ matrix.os }}
+          key: ${{ github.job }}-${{ matrix.os }}
+          variant: sccache
       # - name: Install uv
       #   uses: astral-sh/setup-uv@v5
       #   with:

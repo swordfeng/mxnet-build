@@ -11,35 +11,35 @@ if(CCACHE_FOUND)
   set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
 endif()
 
-ExternalProject_Add(
-  openblas
-  GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
-  GIT_TAG v0.3.29
-  PREFIX ${CMAKE_BINARY_DIR}/openblas
-  CMAKE_ARGS
-    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
-    -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-    -DBUILD_STATIC_LIBS=OFF
-    -DDYNAMIC_ARCH=ON
-    -DDYNAMIC_OLDER=ON
-)
-
 # ExternalProject_Add(
-#   opencv
-#   GIT_REPOSITORY https://github.com/opencv/opencv.git
-#   GIT_TAG 4.11.0
-#   PREFIX ${CMAKE_BINARY_DIR}/opencv
+#   openblas
+#   GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS.git
+#   GIT_TAG v0.3.29
+#   PREFIX ${CMAKE_BINARY_DIR}/openblas
 #   CMAKE_ARGS
+#     -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
+#     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
 #     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
-#     -DBUILD_LIST=core,highgui,imgproc,imgcodecs  # Build only required modules
-#     -DBUILD_JAVA=OFF
-#     -DBUILD_SHARED_LIBS=OFF
-#     -DWITH_OPENEXR=OFF
-#     -DWITH_PROTOBUF=OFF
-#     -DWITH_ADE=OFF
-#   DEPENDS openblas
+#     -DBUILD_STATIC_LIBS=OFF
+#     -DDYNAMIC_ARCH=ON
+#     -DDYNAMIC_OLDER=ON
 # )
+
+ExternalProject_Add(
+  opencv
+  GIT_REPOSITORY https://github.com/opencv/opencv.git
+  GIT_TAG 4.11.0
+  PREFIX ${CMAKE_BINARY_DIR}/opencv
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root
+    -DBUILD_LIST=core#,highgui,imgproc,imgcodecs  # Build only required modules
+    -DBUILD_JAVA=OFF
+    -DBUILD_SHARED_LIBS=OFF
+    -DWITH_OPENEXR=OFF
+    -DWITH_PROTOBUF=OFF
+    -DWITH_ADE=OFF
+  # DEPENDS openblas
+)
 
 # ExternalProject_Add(
 #   mxnet

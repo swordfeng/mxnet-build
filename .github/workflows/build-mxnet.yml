@@ -68,7 +68,7 @@ jobs:
       - name: 'Upload artifacts'
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: artifacts_${{ matrix.os }}
           path: |
             ${{ steps.lib_output.outputs.path }}
             ${{ steps.wheel_output.outputs.path }}

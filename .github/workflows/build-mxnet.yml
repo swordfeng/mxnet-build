@@ -47,43 +47,43 @@ jobs:
       - name: Build
         id: build
         uses: threeal/cmake-action@v2.1.0
-      - name: Verify lib dependencies
-        id: lib_output
-        uses: knicknic/os-specific-run@v1.0.3
-        with:
-          macos: |
-            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.dylib"
-            otool -L $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
-          linux: |
-            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
-            ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
-      - name: Overwrite Python platform tag
-        uses: knicknic/os-specific-run@v1.0.3
-        with:
-          macos: |
-            if [[ $(arch) == 'arm64' ]]; then
-              echo '_PYTHON_HOST_PLATFORM=macosx-11.0-arm64' >> $GITHUB_ENV
-              echo 'ARCHFLAGS="-arch arm64"'' >> $GITHUB_ENV
-            else
-              echo '_PYTHON_HOST_PLATFORM=macosx-10.9-x86_64' >> $GITHUB_ENV
-              echo 'ARCHFLAGS="-arch x86_64"'' >> $GITHUB_ENV
-            fi
-      - name: Bundle Python wheel
-        id: wheel_output
-        run: |
-          cp "${{ steps.lib_output.outputs.path }}" mxnet/python/mxnet/
-          pip wheel mxnet/python
-          wheel_path=(mxnet-*.whl)
-          echo "path=${wheel_path}" >> "$GITHUB_OUTPUT"
-      - name: 'Upload artifacts'
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts
-          path: |
-            ${{ steps.lib_output.outputs.path }}
-            ${{ steps.wheel_output.outputs.path }}
+      # - name: Verify lib dependencies
+      #   id: lib_output
+      #   uses: knicknic/os-specific-run@v1.0.3
+      #   with:
+      #     macos: |
+      #       lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.dylib"
+      #       otool -L $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+      #       echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+      #     linux: |
+      #       lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
+      #       ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+      #       echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+      # - name: Overwrite Python platform tag
+      #   uses: knicknic/os-specific-run@v1.0.3
+      #   with:
+      #     macos: |
+      #       if [[ $(arch) == 'arm64' ]]; then
+      #         echo '_PYTHON_HOST_PLATFORM=macosx-11.0-arm64' >> $GITHUB_ENV
+      #         echo 'ARCHFLAGS="-arch arm64"'' >> $GITHUB_ENV
+      #       else
+      #         echo '_PYTHON_HOST_PLATFORM=macosx-10.9-x86_64' >> $GITHUB_ENV
+      #         echo 'ARCHFLAGS="-arch x86_64"'' >> $GITHUB_ENV
+      #       fi
+      # - name: Bundle Python wheel
+      #   id: wheel_output
+      #   run: |
+      #     cp "${{ steps.lib_output.outputs.path }}" mxnet/python/mxnet/
+      #     pip wheel mxnet/python
+      #     wheel_path=(mxnet-*.whl)
+      #     echo "path=${wheel_path}" >> "$GITHUB_OUTPUT"
+      # - name: 'Upload artifacts'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: artifacts
+      #     path: |
+      #       ${{ steps.lib_output.outputs.path }}
+      #       ${{ steps.wheel_output.outputs.path }}
       - name: 'Upload ccache debug info'
         uses: actions/upload-artifact@v4
         with:

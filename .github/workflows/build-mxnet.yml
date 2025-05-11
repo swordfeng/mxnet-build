@@ -53,11 +53,11 @@ jobs:
         with:
           macos: |
             lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.dylib"
-            otool -L $lib_path
+            otool -L $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           linux: |
             lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
-            ldd $lib_path
+            ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
       - name: Bundle Python wheel
         id: wheel_output

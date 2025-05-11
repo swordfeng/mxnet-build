@@ -42,7 +42,9 @@ ExternalProject_Add(
 ExternalProject_Add(
   mxnet
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mxnet
-  PATCH_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
+  PATCH_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git reset --hard
+    COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/mxnet.patch
   PREFIX ${CMAKE_BINARY_DIR}/mxnet
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_root

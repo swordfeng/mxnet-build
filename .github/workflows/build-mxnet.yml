@@ -23,13 +23,10 @@ jobs:
         with:
           cmakeVersion: "~3.31.0"
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: jianmingyong/ccache-action@v1
         with:
-          key: ${{ github.job }}-${{ matrix.os }}
-      - name: Set ccache debug
-        run: |
-          ccache --set-config=debug=true
-          ccache --set-config=debug_dir=${{ github.workspace }}/ccache_debug
+          ccache-key-prefix: ccache-${{ github.job }}-${{ matrix.os }}
+          max-size: 150M
       # - name: Install uv
       #   uses: astral-sh/setup-uv@v5
       #   with:
@@ -84,8 +81,3 @@ jobs:
       #     path: |
       #       ${{ steps.lib_output.outputs.path }}
       #       ${{ steps.wheel_output.outputs.path }}
-      - name: 'Upload ccache debug info'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccache_debug
-          path: ${{ github.workspace }}/ccache_debug

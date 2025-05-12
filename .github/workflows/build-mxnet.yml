@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    container: ${{ matrix.os == 'ubuntu-latest' && 'quay.io/pypa/manylinux2010_x86_64:latest' || null }}
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -20,10 +19,13 @@ jobs:
 
     steps:
       - name: Set CMake version
-        if: ${{ matrix.os == 'macos-latest' }}
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: "~3.31.0"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
       - name: Check compiler version
         run: ${CC:-cc} --version
       - name: Checkout source
@@ -43,12 +45,8 @@ jobs:
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           linux: |
             lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
-            ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+            ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
       - name: Overwrite Python platform tag
         uses: knicknic/os-specific-run@v1.0.3
         with:

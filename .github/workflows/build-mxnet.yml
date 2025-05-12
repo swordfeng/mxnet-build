@@ -20,6 +20,7 @@ jobs:
 
     steps:
       - name: Set CMake version
+        if: ${{ matrix.os == 'macos-latest' }}
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: "~3.31.0"

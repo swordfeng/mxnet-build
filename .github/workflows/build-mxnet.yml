@@ -24,10 +24,6 @@ jobs:
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: "~3.31.0"
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
       - name: Check compiler version
         run: ${CC:-cc} --version
       - name: Checkout source
@@ -47,8 +43,12 @@ jobs:
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           linux: |
             lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
-            ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+            ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
       - name: Overwrite Python platform tag
         uses: knicknic/os-specific-run@v1.0.3
         with:

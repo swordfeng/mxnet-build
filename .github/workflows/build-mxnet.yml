@@ -45,7 +45,7 @@ jobs:
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           linux: |
             lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
-            ldd $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+            ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
       - name: Overwrite Python platform tag
         uses: knicknic/os-specific-run@v1.0.3
@@ -69,6 +69,48 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts_${{ matrix.os }}
+          path: |
+            ${{ steps.lib_output.outputs.path }}
+            ${{ steps.wheel_output.outputs.path }}
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Check compiler version
+        run: docker run --rm -t quay.io/pypa/manylinux2010_x86_64:latest bash -c 'cc --version'
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - name: Build
+        id: build
+        run: |
+          docker run --rm -t quay.io/pypa/manylinux2010_x86_64:latest \
+            -v ${{ github.workspace }}:/mxnet-build \
+            bash -c "cd /mxnet-build && mkdir build && cd build && cmake .. && make -j2" && \
+          echo "build-dir=$(pwd)/mxnet-build/build" >> "$GITHUB_OUTPUT"
+      - name: Verify lib dependencies
+        id: lib_output
+        uses: knicknic/os-specific-run@v1.0.3
+        with:
+          linux: |
+            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
+            ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
+      - name: Bundle Python wheel
+        id: wheel_output
+        run: |
+          cp "${{ steps.lib_output.outputs.path }}" mxnet/python/mxnet/
+          pip wheel mxnet/python
+          wheel_path=(mxnet-*.whl)
+          echo "path=${wheel_path}" >> "$GITHUB_OUTPUT"
+      - name: 'Upload artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts_docker
           path: |
             ${{ steps.lib_output.outputs.path }}
             ${{ steps.wheel_output.outputs.path }}

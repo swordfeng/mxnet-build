@@ -88,8 +88,8 @@ jobs:
       - name: Build
         id: build
         run: |
-          docker run --rm -t quay.io/pypa/manylinux2010_x86_64:latest \
-            -v ${{ github.workspace }}:/mxnet-build \
+          docker run --rm -v ${{ github.workspace }}:/mxnet-build -t \
+            quay.io/pypa/manylinux2010_x86_64:latest \
             bash -c "cd /mxnet-build && mkdir build && cd build && cmake .. && make -j2" && \
           echo "build-dir=$(pwd)/mxnet-build/build" >> "$GITHUB_OUTPUT"
       - name: Verify lib dependencies

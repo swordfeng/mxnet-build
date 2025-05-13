@@ -91,7 +91,7 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/mxnet-build -t \
             quay.io/pypa/manylinux2010_x86_64:latest \
             bash -c "git config --global safe.directory '*' && cd /mxnet-build && mkdir build && cd build && cmake .. && make -j2" && \
-          echo "build-dir=$(pwd)/mxnet-build/build" >> "$GITHUB_OUTPUT"
+          echo "build-dir=$(pwd)/build" >> "$GITHUB_OUTPUT"
       - name: Verify lib dependencies
         id: lib_output
         uses: knicknic/os-specific-run@v1.0.3

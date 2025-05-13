@@ -97,7 +97,7 @@ jobs:
         uses: knicknic/os-specific-run@v1.0.3
         with:
           linux: |
-            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.so"
+            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib64/libmxnet.so"
             ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
       - name: Bundle Python wheel

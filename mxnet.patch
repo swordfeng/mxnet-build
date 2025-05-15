@@ -207,6 +207,36 @@ index ac47f2fde..787410ff0 100644
                                      lhs.dptr<LType>(), rhs.dptr<RType>(), out.dptr<RType>());
                });
              });
+diff --git a/src/operator/numpy/random/np_multinomial_op.h b/src/operator/numpy/random/np_multinomial_op.h
+index faebff342..acc8cb0a3 100644
+--- a/src/operator/numpy/random/np_multinomial_op.h
++++ b/src/operator/numpy/random/np_multinomial_op.h
+@@ -98,8 +98,13 @@ inline bool NumpyMultinomialOpType(const nnvm::NodeAttrs& attrs,
+   return true;
+ }
+ 
++#if MXNET_USE_CUDA
+ template<typename DType>
+ void CheckPvalGPU(const OpContext& ctx, DType* input, int prob_length);
++#else // MXNET_USE_CUDA
++template<typename DType>
++inline void CheckPvalGPU(const OpContext& ctx, DType* input, int prob_length) {}
++#endif  // MXNET_USE_CUDA
+ 
+ template<typename DType>
+ void CheckPval(DType* input, int prob_length) {
+diff --git a/src/operator/operator_tune.h b/src/operator/operator_tune.h
+index 6e73ed371..1d0c52a49 100644
+--- a/src/operator/operator_tune.h
++++ b/src/operator/operator_tune.h
+@@ -25,6 +25,7 @@
+ #include <set>
+ #include <atomic>
+ #include <string>
++#include <chrono>
+ 
+ // #define MXNET_DEBUG_TUNING_LAUNCH
+ 
 diff --git a/src/operator/tensor/elemwise_binary_broadcast_op.h b/src/operator/tensor/elemwise_binary_broadcast_op.h
 index ce10ce359..1e35573e2 100644
 --- a/src/operator/tensor/elemwise_binary_broadcast_op.h

@@ -72,7 +72,7 @@ jobs:
             ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           windows: |
-            $lib_path = "${{ github.workspace }}\build\install_root\bin\mxnet.dll"
+            $lib_path = "${{ github.workspace }}\build\install_root\bin\libmxnet.dll"
             dumpbin /nologo /dependents $lib_path | Out-File -Append -FilePath "$GITHUB_STEP_SUMMARY"
             Add-Content -Path $env:GITHUB_OUTPUT -Value "path=$lib_path"
       - name: Overwrite Python platform tag

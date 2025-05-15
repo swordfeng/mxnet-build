@@ -54,28 +54,25 @@ jobs:
         with:
           linux: |
             docker run --rm -v ${{ github.workspace }}:/mxnet-build -t $docker_image \
-              bash -c "git config --global safe.directory '*' && cd /mxnet-build && mkdir build && cd build && cmake .. && make -j$(nproc)" && \
-            echo "build-dir=$(pwd)/build" >> "$GITHUB_OUTPUT"
+              bash -c "git config --global safe.directory '*' && cd /mxnet-build && mkdir build && cd build && cmake .. && make -j$(nproc)"
           macos: |
-            mkdir build && cd build && cmake .. && make -j$(sysctl -n hw.logicalcpu) && \
-            echo "build-dir=$(pwd)/build" >> "$GITHUB_OUTPUT"
+            mkdir build && cd build && cmake .. && make -j$(sysctl -n hw.logicalcpu)
           windows: |
-            mkdir build && cd build && cmake .. -G Ninja && cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS && `
-            Add-Content -Path $env:GITHUB_OUTPUT -Value "build-dir=$(Get-Location)\build"
+            mkdir build && cd build && cmake .. -G Ninja && cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
       - name: Verify lib dependencies
         id: lib_output
         uses: knicknic/os-specific-run@v1.0.3
         with:
           macos: |
-            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib/libmxnet.dylib"
+            lib_path="${{ github.workspace }}/build/install_root/lib/libmxnet.dylib"
             otool -L $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           linux: |
-            lib_path="${{ steps.build.outputs.build-dir }}/install_root/lib64/libmxnet.so"
+            lib_path="${{ github.workspace }}/build/install_root/lib64/libmxnet.so"
             ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           windows: |
-            $lib_path = "${{ steps.build.outputs.build-dir }}\install_root\bin\mxnet.dll"
+            $lib_path = "${{ github.workspace }}\build\install_root\bin\mxnet.dll"
             dumpbin /nologo /dependents $lib_path | Out-File -Append -FilePath "$GITHUB_STEP_SUMMARY"
             Add-Content -Path $env:GITHUB_OUTPUT -Value "path=$lib_path"
       - name: Overwrite Python platform tag

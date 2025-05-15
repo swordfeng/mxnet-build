@@ -73,7 +73,7 @@ jobs:
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
           windows: |
             $lib_path = "${{ github.workspace }}\build\install_root\bin\libmxnet.dll"
-            dumpbin /nologo /dependents $lib_path | Out-File -Append -FilePath "$GITHUB_STEP_SUMMARY"
+            dumpbin /nologo /dependents $lib_path | Out-File -Append -FilePath "$env:GITHUB_STEP_SUMMARY"
             Add-Content -Path $env:GITHUB_OUTPUT -Value "path=$lib_path"
       - name: Overwrite Python platform tag
         uses: knicknic/os-specific-run@v1.0.3

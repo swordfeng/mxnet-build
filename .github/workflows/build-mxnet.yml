@@ -67,12 +67,10 @@ jobs:
             lib_path="${{ github.workspace }}/build/install_root/lib/libmxnet.dylib"
             otool -L $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
-            strip $lib_path
           linux: |
             lib_path="${{ github.workspace }}/build/install_root/lib64/libmxnet.so"
             ldd -v $lib_path | tee -a "$GITHUB_STEP_SUMMARY"
             echo "path=${lib_path}" >> "$GITHUB_OUTPUT"
-            strip $lib_path
           windows: |
             $lib_path = "${{ github.workspace }}\build\install_root\bin\libmxnet.dll"
             dumpbin /nologo /dependents $lib_path | Out-File -Append -FilePath "$env:GITHUB_STEP_SUMMARY"
